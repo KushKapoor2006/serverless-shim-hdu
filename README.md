@@ -28,6 +28,7 @@ This repository implements a hardware **HDU (Hardware Dispatch Unit)** for serve
 
 ```
 serverless-shim-hdu/
+|
 ├─ evaluation/                  # simulator outputs & RTL run logs & plots
 │  ├─ logs/
 │  └─ plots/
