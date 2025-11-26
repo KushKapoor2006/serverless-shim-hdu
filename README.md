@@ -31,18 +31,23 @@ serverless-shim-hdu/
 ├─ evaluation/                  # simulator outputs & RTL run logs & plots
 │  ├─ logs/
 │  └─ plots/
+|
 ├─ hw/
 │  ├─ obj_dir/
 │  ├─ rtl/                      # SystemVerilog RTL source files
 |  ├─ Makefile                  # top-level build / run helpers (verilator / sim)
 |  ├─ verilator_harness.cpp     # Verilator harness
+|
 ├─ sim/                         # Python-based SIM model + experiment scripts
+|
 ├─ sw/                          # host-side helper scripts, log parsing + comparison
 │  ├─ tests/                    # parse_rtl_logs.py, compare_with_sim.py
 │  └─ logs/                     # Software test logs and plots
+|
 ├─ synthesis/                   # synthesis artifacts and Yosys scripts
 │  ├─ outputs/                  # writeouts from Yosys (json, verilog, logs)
 │  └─ hdu_synth.ys              # Yosys script
+|
 ├─ Serverless - XPU Shim.pdf    # Orignal Reference paper for Serverless Computing on Heterogeneous Computers
 └─ README.md
 ```
