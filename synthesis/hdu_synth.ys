@@ -1,0 +1,52 @@
+# ============================================================
+# Yosys Synthesis Script for HDU Top
+# ============================================================
+
+
+# ------------------------------------------------------------
+# Read RTL (SystemVerilog)
+# ------------------------------------------------------------
+read_verilog -sv \
+    rtl/hdu_defs.svh \
+    rtl/header_parser.sv \
+    rtl/auth_cam.sv \
+    rtl/slot_allocator.sv \
+    rtl/fallback_bridge.sv \
+    rtl/hdu_top.sv
+
+# ------------------------------------------------------------
+# Set hierarchy and top module
+# ------------------------------------------------------------
+hierarchy -check -top hdu_top
+
+# ------------------------------------------------------------
+# Generic synthesis flow (no tech mapping yet)
+# ------------------------------------------------------------
+proc; opt
+fsm;  opt
+memory; opt
+
+# ------------------------------------------------------------
+# 1) Hierarchical view of hdu_top (with submodules)
+# ------------------------------------------------------------
+stat -top hdu_top
+
+# Save hierarchical netlist
+write_verilog -noattr outputs/hdu_top_hier.v
+write_json              outputs/hdu_top_hier.json
+
+# ------------------------------------------------------------
+# 2) Flatten hdu_top and get *total* cell count
+# ------------------------------------------------------------
+flatten hdu_top
+opt
+
+# Flattened stats (this is what you quote on your CV)
+stat -top hdu_top
+
+# Save flattened netlist
+write_verilog -noattr outputs/hdu_top_flat.v
+write_json              outputs/hdu_top_flat.json
+
+# Optional: schematic of flattened top (can be slow, OK to ignore)
+show -prefix outputs/hdu_top_flat -colors 1 -format dot

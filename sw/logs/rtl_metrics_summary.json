@@ -1,0 +1,21 @@
+{
+  "total_sends": 9,
+  "successes": 1,
+  "failures": 1,
+  "timeouts": 7,
+  "success_rate": 0.1111111111111111,
+  "dispatch_stats": {
+    "count": 1,
+    "mean_us": 0.02,
+    "std_us": 0.0,
+    "median_us": 0.02,
+    "p99_us": 0.02
+  },
+  "fallback_stats": {
+    "count": 1,
+    "mean_us": 0.02,
+    "std_us": 0.0,
+    "median_us": 0.02,
+    "p99_us": 0.02
+  }
+}

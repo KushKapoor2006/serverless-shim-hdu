@@ -1,0 +1,1137 @@
+
+ /----------------------------------------------------------------------------\
+ |                                                                            |
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |                                                                            |
+ |  Copyright (C) 2012 - 2019  Clifford Wolf <clifford@clifford.at>           |
+ |                                                                            |
+ |  Permission to use, copy, modify, and/or distribute this software for any  |
+ |  purpose with or without fee is hereby granted, provided that the above    |
+ |  copyright notice and this permission notice appear in all copies.         |
+ |                                                                            |
+ |  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES  |
+ |  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF          |
+ |  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR   |
+ |  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES    |
+ |  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN     |
+ |  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF   |
+ |  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.            |
+ |                                                                            |
+ \----------------------------------------------------------------------------/
+
+ Yosys 0.9 (git sha1 1979e0b)
+
+
+-- Executing script file `hdu_synth.ys' --
+
+1. Executing Verilog-2005 frontend: rtl/hdu_defs.svh
+Parsing SystemVerilog input from `rtl/hdu_defs.svh' to AST representation.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: rtl/header_parser.sv
+Parsing SystemVerilog input from `rtl/header_parser.sv' to AST representation.
+Generating RTLIL representation for module `\header_parser'.
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: rtl/auth_cam.sv
+Parsing SystemVerilog input from `rtl/auth_cam.sv' to AST representation.
+Generating RTLIL representation for module `\auth_cam'.
+Warning: Replacing memory \table_func with list of registers. See rtl/auth_cam.sv:39
+Warning: Replacing memory \table_tok with list of registers. See rtl/auth_cam.sv:39
+Successfully finished Verilog frontend.
+
+4. Executing Verilog-2005 frontend: rtl/slot_allocator.sv
+Parsing SystemVerilog input from `rtl/slot_allocator.sv' to AST representation.
+Generating RTLIL representation for module `\slot_allocator'.
+Successfully finished Verilog frontend.
+
+5. Executing Verilog-2005 frontend: rtl/fallback_bridge.sv
+Parsing SystemVerilog input from `rtl/fallback_bridge.sv' to AST representation.
+Generating RTLIL representation for module `\fallback_bridge'.
+Warning: Replacing memory \mem with list of registers. See rtl/fallback_bridge.sv:39
+Successfully finished Verilog frontend.
+
+6. Executing Verilog-2005 frontend: rtl/hdu_top.sv
+Parsing SystemVerilog input from `rtl/hdu_top.sv' to AST representation.
+Generating RTLIL representation for module `\hdu_top'.
+Successfully finished Verilog frontend.
+
+7. Executing HIERARCHY pass (managing design hierarchy).
+
+7.1. Analyzing design hierarchy..
+Top module:  \hdu_top
+Used module:     \fallback_bridge
+Used module:     \slot_allocator
+Used module:     \auth_cam
+
+7.2. Executing AST frontend in derive mode using pre-parsed AST for module `\auth_cam'.
+Parameter \TABLE_SIZE = 16
+Generating RTLIL representation for module `$paramod\auth_cam\TABLE_SIZE=16'.
+Warning: Replacing memory \table_func with list of registers. See rtl/auth_cam.sv:39
+Warning: Replacing memory \table_tok with list of registers. See rtl/auth_cam.sv:39
+
+7.3. Analyzing design hierarchy..
+Top module:  \hdu_top
+Used module:     \fallback_bridge
+Used module:     \slot_allocator
+Used module:     $paramod\auth_cam\TABLE_SIZE=16
+
+7.4. Analyzing design hierarchy..
+Top module:  \hdu_top
+Used module:     \fallback_bridge
+Used module:     \slot_allocator
+Used module:     $paramod\auth_cam\TABLE_SIZE=16
+Removing unused module `\auth_cam'.
+Removing unused module `\header_parser'.
+Removed 2 unused modules.
+
+8. Executing PROC pass (convert processes to netlists).
+
+8.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+8.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Removed 1 dead cases from process $proc$rtl/fallback_bridge.sv:32$222 in module fallback_bridge.
+Marked 5 switch rules as full_case in process $proc$rtl/fallback_bridge.sv:32$222 in module fallback_bridge.
+Marked 3 switch rules as full_case in process $proc$rtl/slot_allocator.sv:31$119 in module slot_allocator.
+Marked 5 switch rules as full_case in process $proc$rtl/auth_cam.sv:31$278 in module $paramod\auth_cam\TABLE_SIZE=16.
+Removed a total of 1 dead cases.
+
+8.3. Executing PROC_INIT pass (extract init attributes).
+
+8.4. Executing PROC_ARST pass (detect async resets in processes).
+Found async reset \rst_n in `\fallback_bridge.$proc$rtl/fallback_bridge.sv:32$222'.
+Found async reset \rst_n in `\slot_allocator.$proc$rtl/slot_allocator.sv:31$119'.
+Found async reset \rst_n in `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+
+8.5. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\fallback_bridge.$proc$rtl/fallback_bridge.sv:32$222'.
+     1/30: $3$mem2reg_rd$\mem$rtl/fallback_bridge.sv:45$220_DATA[63:0]$251
+     2/30: $2$mem2reg_rd$\mem$rtl/fallback_bridge.sv:45$220_DATA[63:0]$250
+     3/30: $2$mem2reg_rd$\mem$rtl/fallback_bridge.sv:45$220_ADDR[1:0]$249
+     4/30: $2$mem2reg_wr$\mem$rtl/fallback_bridge.sv:39$219_ADDR[1:0]$243
+     5/30: $2$mem2reg_wr$\mem$rtl/fallback_bridge.sv:39$219_DATA[63:0]$244
+     6/30: $2$func$\pack$rtl/fallback_bridge.sv:39$218$\pack[63:0]$240
+     7/30: $2$func$\pack$rtl/fallback_bridge.sv:39$218$\t[63:0]$242
+     8/30: $2$func$\pack$rtl/fallback_bridge.sv:39$218$\f[15:0]$241
+     9/30: $1$mem2reg_rd$\mem$rtl/fallback_bridge.sv:45$220_DATA[63:0]$237
+    10/30: $1$mem2reg_rd$\mem$rtl/fallback_bridge.sv:45$220_ADDR[1:0]$236
+    11/30: $1$mem2reg_wr$\mem$rtl/fallback_bridge.sv:39$219_DATA[63:0]$235
+    12/30: $1$mem2reg_wr$\mem$rtl/fallback_bridge.sv:39$219_ADDR[1:0]$234
+    13/30: $1$func$\pack$rtl/fallback_bridge.sv:39$218$\t[63:0]$233
+    14/30: $1$func$\pack$rtl/fallback_bridge.sv:39$218$\f[15:0]$232
+    15/30: $1$func$\pack$rtl/fallback_bridge.sv:39$218$\pack[63:0]$231
+    16/30: $0$mem2reg_rd$\mem$rtl/fallback_bridge.sv:45$220_DATA[63:0]$229
+    17/30: $0$mem2reg_rd$\mem$rtl/fallback_bridge.sv:45$220_ADDR[1:0]$228
+    18/30: $0$mem2reg_wr$\mem$rtl/fallback_bridge.sv:39$219_DATA[63:0]$227
+    19/30: $0$mem2reg_wr$\mem$rtl/fallback_bridge.sv:39$219_ADDR[1:0]$226
+    20/30: $0$func$\pack$rtl/fallback_bridge.sv:39$218$\t[63:0]$225
+    21/30: $0$func$\pack$rtl/fallback_bridge.sv:39$218$\f[15:0]$224
+    22/30: $0$func$\pack$rtl/fallback_bridge.sv:39$218$\pack[63:0]$223
+    23/30: $0\mem[3][63:0]
+    24/30: $0\mem[2][63:0]
+    25/30: $0\mem[1][63:0]
+    26/30: $0\mem[0][63:0]
+    27/30: $0\irq_data[63:0]
+    28/30: $0\count[2:0]
+    29/30: $0\wr_ptr[1:0]
+    30/30: $0\rd_ptr[1:0]
+Creating decoders for process `\slot_allocator.$proc$rtl/slot_allocator.sv:31$119'.
+     1/42: $2\i[31:0]
+     2/42: $2\found[0:0]
+     3/42: $0\busy[31:0] [31]
+     4/42: $0\busy[31:0] [30]
+     5/42: $0\busy[31:0] [29]
+     6/42: $0\busy[31:0] [28]
+     7/42: $0\busy[31:0] [27]
+     8/42: $0\busy[31:0] [26]
+     9/42: $0\busy[31:0] [25]
+    10/42: $0\busy[31:0] [24]
+    11/42: $0\busy[31:0] [23]
+    12/42: $0\busy[31:0] [22]
+    13/42: $0\busy[31:0] [21]
+    14/42: $0\busy[31:0] [20]
+    15/42: $0\busy[31:0] [19]
+    16/42: $0\busy[31:0] [18]
+    17/42: $0\busy[31:0] [17]
+    18/42: $0\busy[31:0] [16]
+    19/42: $0\busy[31:0] [15]
+    20/42: $0\busy[31:0] [14]
+    21/42: $0\busy[31:0] [13]
+    22/42: $0\busy[31:0] [12]
+    23/42: $0\busy[31:0] [11]
+    24/42: $0\busy[31:0] [10]
+    25/42: $0\busy[31:0] [9]
+    26/42: $0\busy[31:0] [8]
+    27/42: $0\busy[31:0] [7]
+    28/42: $0\busy[31:0] [6]
+    29/42: $0\busy[31:0] [5]
+    30/42: $0\busy[31:0] [4]
+    31/42: $0\busy[31:0] [3]
+    32/42: $0\busy[31:0] [2]
+    33/42: $0\busy[31:0] [1]
+    34/42: $0\busy[31:0] [0]
+    35/42: $1\i[31:0]
+    36/42: $0\found[0:0]
+    37/42: $0\i[31:0]
+    38/42: $0\alloc_valid[0:0]
+    39/42: $0\alloc_fail[0:0]
+    40/42: $0\alloc_success[0:0]
+    41/42: $0\alloc_slot_id[4:0]
+    42/42: $1\found[0:0]
+Creating decoders for process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+     1/52: $2\i[31:0]
+     2/52: $2$mem2reg_wr$\table_func$rtl/auth_cam.sv:39$277_ADDR[3:0]$294
+     3/52: $2$mem2reg_wr$\table_func$rtl/auth_cam.sv:39$277_DATA[15:0]$291
+     4/52: $2$mem2reg_wr$\table_tok$rtl/auth_cam.sv:39$276_ADDR[3:0]$290
+     5/52: $2$mem2reg_wr$\table_tok$rtl/auth_cam.sv:39$276_DATA[63:0]$293
+     6/52: $2$splitcmplxassign$rtl/auth_cam.sv:39$259[79:0]$292
+     7/52: $1\i[31:0]
+     8/52: $1$mem2reg_wr$\table_func$rtl/auth_cam.sv:39$277_ADDR[3:0]$289
+     9/52: $1$mem2reg_wr$\table_tok$rtl/auth_cam.sv:39$276_DATA[63:0]$288
+    10/52: $1$splitcmplxassign$rtl/auth_cam.sv:39$259[79:0]$287
+    11/52: $1$mem2reg_wr$\table_func$rtl/auth_cam.sv:39$277_DATA[15:0]$286
+    12/52: $1$mem2reg_wr$\table_tok$rtl/auth_cam.sv:39$276_ADDR[3:0]$285
+    13/52: $0$mem2reg_wr$\table_func$rtl/auth_cam.sv:39$277_ADDR[3:0]$283
+    14/52: $0$mem2reg_wr$\table_tok$rtl/auth_cam.sv:39$276_DATA[63:0]$282
+    15/52: $0$splitcmplxassign$rtl/auth_cam.sv:39$259[79:0]$281
+    16/52: $0$mem2reg_wr$\table_func$rtl/auth_cam.sv:39$277_DATA[15:0]$280
+    17/52: $0$mem2reg_wr$\table_tok$rtl/auth_cam.sv:39$276_ADDR[3:0]$279
+    18/52: $0\i[31:0]
+    19/52: $0\table_func[15][15:0]
+    20/52: $0\table_func[14][15:0]
+    21/52: $0\table_func[13][15:0]
+    22/52: $0\table_func[12][15:0]
+    23/52: $0\table_func[11][15:0]
+    24/52: $0\table_func[10][15:0]
+    25/52: $0\table_func[9][15:0]
+    26/52: $0\table_func[8][15:0]
+    27/52: $0\table_func[7][15:0]
+    28/52: $0\table_func[6][15:0]
+    29/52: $0\table_func[5][15:0]
+    30/52: $0\table_func[4][15:0]
+    31/52: $0\table_func[3][15:0]
+    32/52: $0\table_func[2][15:0]
+    33/52: $0\table_func[1][15:0]
+    34/52: $0\table_func[0][15:0]
+    35/52: $0\table_tok[15][63:0]
+    36/52: $0\table_tok[14][63:0]
+    37/52: $0\table_tok[13][63:0]
+    38/52: $0\table_tok[12][63:0]
+    39/52: $0\table_tok[11][63:0]
+    40/52: $0\table_tok[10][63:0]
+    41/52: $0\table_tok[9][63:0]
+    42/52: $0\table_tok[8][63:0]
+    43/52: $0\table_tok[7][63:0]
+    44/52: $0\table_tok[6][63:0]
+    45/52: $0\table_tok[5][63:0]
+    46/52: $0\table_tok[4][63:0]
+    47/52: $0\table_tok[3][63:0]
+    48/52: $0\table_tok[2][63:0]
+    49/52: $0\table_tok[1][63:0]
+    50/52: $0\table_tok[0][63:0]
+    51/52: $0\auth_done[0:0]
+    52/52: $0\auth_pass[0:0]
+Creating decoders for process `\hdu_top.$proc$rtl/hdu_top.sv:40$254'.
+     1/3: $0\req_token[63:0]
+     2/3: $0\req_func[15:0]
+     3/3: $0\req_valid[0:0]
+
+8.6. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\hdu_top.\req_valid' from process `\hdu_top.$proc$rtl/hdu_top.sv:40$254'.
+No latch inferred for signal `\hdu_top.\req_func' from process `\hdu_top.$proc$rtl/hdu_top.sv:40$254'.
+No latch inferred for signal `\hdu_top.\req_token' from process `\hdu_top.$proc$rtl/hdu_top.sv:40$254'.
+
+8.7. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\fallback_bridge.\rd_ptr' using process `\fallback_bridge.$proc$rtl/fallback_bridge.sv:32$222'.
+  created $adff cell `$procdff$1931' with positive edge clock and negative level reset.
+Creating register for signal `\fallback_bridge.\wr_ptr' using process `\fallback_bridge.$proc$rtl/fallback_bridge.sv:32$222'.
+  created $adff cell `$procdff$1932' with positive edge clock and negative level reset.
+Creating register for signal `\fallback_bridge.\count' using process `\fallback_bridge.$proc$rtl/fallback_bridge.sv:32$222'.
+  created $adff cell `$procdff$1933' with positive edge clock and negative level reset.
+Creating register for signal `\fallback_bridge.\irq_data' using process `\fallback_bridge.$proc$rtl/fallback_bridge.sv:32$222'.
+  created $dff cell `$procdff$1934' with positive edge clock.
+Creating register for signal `\fallback_bridge.$func$\pack$rtl/fallback_bridge.sv:39$218$\pack' using process `\fallback_bridge.$proc$rtl/fallback_bridge.sv:32$222'.
+  created $adff cell `$procdff$1935' with positive edge clock and negative level reset.
+Creating register for signal `\fallback_bridge.$func$\pack$rtl/fallback_bridge.sv:39$218$\f' using process `\fallback_bridge.$proc$rtl/fallback_bridge.sv:32$222'.
+  created $adff cell `$procdff$1936' with positive edge clock and negative level reset.
+Creating register for signal `\fallback_bridge.$func$\pack$rtl/fallback_bridge.sv:39$218$\t' using process `\fallback_bridge.$proc$rtl/fallback_bridge.sv:32$222'.
+  created $adff cell `$procdff$1937' with positive edge clock and negative level reset.
+Creating register for signal `\fallback_bridge.\mem[0]' using process `\fallback_bridge.$proc$rtl/fallback_bridge.sv:32$222'.
+  created $dff cell `$procdff$1938' with positive edge clock.
+Creating register for signal `\fallback_bridge.\mem[1]' using process `\fallback_bridge.$proc$rtl/fallback_bridge.sv:32$222'.
+  created $dff cell `$procdff$1939' with positive edge clock.
+Creating register for signal `\fallback_bridge.\mem[2]' using process `\fallback_bridge.$proc$rtl/fallback_bridge.sv:32$222'.
+  created $dff cell `$procdff$1940' with positive edge clock.
+Creating register for signal `\fallback_bridge.\mem[3]' using process `\fallback_bridge.$proc$rtl/fallback_bridge.sv:32$222'.
+  created $dff cell `$procdff$1941' with positive edge clock.
+Creating register for signal `\fallback_bridge.$mem2reg_wr$\mem$rtl/fallback_bridge.sv:39$219_ADDR' using process `\fallback_bridge.$proc$rtl/fallback_bridge.sv:32$222'.
+  created $adff cell `$procdff$1942' with positive edge clock and negative level reset.
+Creating register for signal `\fallback_bridge.$mem2reg_wr$\mem$rtl/fallback_bridge.sv:39$219_DATA' using process `\fallback_bridge.$proc$rtl/fallback_bridge.sv:32$222'.
+  created $adff cell `$procdff$1943' with positive edge clock and negative level reset.
+Creating register for signal `\fallback_bridge.$mem2reg_rd$\mem$rtl/fallback_bridge.sv:45$220_ADDR' using process `\fallback_bridge.$proc$rtl/fallback_bridge.sv:32$222'.
+  created $adff cell `$procdff$1944' with positive edge clock and negative level reset.
+Creating register for signal `\fallback_bridge.$mem2reg_rd$\mem$rtl/fallback_bridge.sv:45$220_DATA' using process `\fallback_bridge.$proc$rtl/fallback_bridge.sv:32$222'.
+  created $adff cell `$procdff$1945' with positive edge clock and negative level reset.
+Creating register for signal `\slot_allocator.\i' using process `\slot_allocator.$proc$rtl/slot_allocator.sv:31$119'.
+  created $dff cell `$procdff$1946' with positive edge clock.
+Creating register for signal `\slot_allocator.\busy' using process `\slot_allocator.$proc$rtl/slot_allocator.sv:31$119'.
+  created $adff cell `$procdff$1947' with positive edge clock and negative level reset.
+Creating register for signal `\slot_allocator.\alloc_slot_id' using process `\slot_allocator.$proc$rtl/slot_allocator.sv:31$119'.
+  created $adff cell `$procdff$1948' with positive edge clock and negative level reset.
+Creating register for signal `\slot_allocator.\alloc_success' using process `\slot_allocator.$proc$rtl/slot_allocator.sv:31$119'.
+  created $adff cell `$procdff$1949' with positive edge clock and negative level reset.
+Creating register for signal `\slot_allocator.\alloc_fail' using process `\slot_allocator.$proc$rtl/slot_allocator.sv:31$119'.
+  created $adff cell `$procdff$1950' with positive edge clock and negative level reset.
+Creating register for signal `\slot_allocator.\alloc_valid' using process `\slot_allocator.$proc$rtl/slot_allocator.sv:31$119'.
+  created $adff cell `$procdff$1951' with positive edge clock and negative level reset.
+Creating register for signal `\slot_allocator.\found' using process `\slot_allocator.$proc$rtl/slot_allocator.sv:31$119'.
+  created $dff cell `$procdff$1952' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\auth_pass' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $adff cell `$procdff$1953' with positive edge clock and negative level reset.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\auth_done' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $adff cell `$procdff$1954' with positive edge clock and negative level reset.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\i' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1955' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_tok[0]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1956' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_tok[1]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1957' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_tok[2]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1958' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_tok[3]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1959' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_tok[4]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1960' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_tok[5]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1961' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_tok[6]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1962' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_tok[7]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1963' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_tok[8]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1964' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_tok[9]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1965' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_tok[10]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1966' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_tok[11]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1967' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_tok[12]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1968' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_tok[13]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1969' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_tok[14]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1970' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_tok[15]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1971' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_func[0]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1972' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_func[1]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1973' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_func[2]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1974' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_func[3]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1975' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_func[4]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1976' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_func[5]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1977' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_func[6]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1978' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_func[7]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1979' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_func[8]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1980' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_func[9]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1981' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_func[10]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1982' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_func[11]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1983' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_func[12]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1984' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_func[13]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1985' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_func[14]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1986' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.\table_func[15]' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $dff cell `$procdff$1987' with positive edge clock.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.$mem2reg_wr$\table_tok$rtl/auth_cam.sv:39$276_ADDR' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $adff cell `$procdff$1988' with positive edge clock and negative level reset.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.$mem2reg_wr$\table_func$rtl/auth_cam.sv:39$277_DATA' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $adff cell `$procdff$1989' with positive edge clock and negative level reset.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.$splitcmplxassign$rtl/auth_cam.sv:39$259' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $adff cell `$procdff$1990' with positive edge clock and negative level reset.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.$mem2reg_wr$\table_tok$rtl/auth_cam.sv:39$276_DATA' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $adff cell `$procdff$1991' with positive edge clock and negative level reset.
+Creating register for signal `$paramod\auth_cam\TABLE_SIZE=16.$mem2reg_wr$\table_func$rtl/auth_cam.sv:39$277_ADDR' using process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+  created $adff cell `$procdff$1992' with positive edge clock and negative level reset.
+
+8.8. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Found and cleaned up 4 empty switches in `\fallback_bridge.$proc$rtl/fallback_bridge.sv:32$222'.
+Removing empty process `fallback_bridge.$proc$rtl/fallback_bridge.sv:32$222'.
+Found and cleaned up 36 empty switches in `\slot_allocator.$proc$rtl/slot_allocator.sv:31$119'.
+Removing empty process `slot_allocator.$proc$rtl/slot_allocator.sv:31$119'.
+Found and cleaned up 20 empty switches in `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+Removing empty process `$paramod\auth_cam\TABLE_SIZE=16.$proc$rtl/auth_cam.sv:31$278'.
+Removing empty process `hdu_top.$proc$rtl/hdu_top.sv:40$254'.
+Cleaned up 60 empty switches.
+
+9. Executing OPT pass (performing simple optimizations).
+
+9.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module fallback_bridge.
+<suppressed ~3 debug messages>
+Optimizing module slot_allocator.
+<suppressed ~228 debug messages>
+Optimizing module $paramod\auth_cam\TABLE_SIZE=16.
+<suppressed ~2 debug messages>
+Optimizing module hdu_top.
+
+9.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\fallback_bridge'.
+<suppressed ~12 debug messages>
+Finding identical cells in module `\slot_allocator'.
+Finding identical cells in module `$paramod\auth_cam\TABLE_SIZE=16'.
+<suppressed ~51 debug messages>
+Finding identical cells in module `\hdu_top'.
+Removed a total of 21 cells.
+
+9.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \fallback_bridge..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $procmux$370.
+    dead port 2/2 on $mux $procmux$370.
+    dead port 1/2 on $mux $procmux$367.
+    dead port 2/2 on $mux $procmux$367.
+    dead port 1/2 on $mux $procmux$364.
+    dead port 2/2 on $mux $procmux$364.
+    dead port 1/2 on $mux $procmux$361.
+    dead port 2/2 on $mux $procmux$361.
+    dead port 1/2 on $mux $procmux$358.
+    dead port 2/2 on $mux $procmux$358.
+    dead port 1/2 on $mux $procmux$355.
+    dead port 2/2 on $mux $procmux$355.
+    dead port 1/2 on $mux $procmux$352.
+    dead port 2/2 on $mux $procmux$352.
+    dead port 2/2 on $mux $procmux$349.
+Running muxtree optimizer on module \slot_allocator..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $procmux$1330.
+    dead port 2/2 on $mux $procmux$1330.
+    dead port 1/2 on $mux $procmux$1328.
+    dead port 2/2 on $mux $procmux$1328.
+    dead port 1/2 on $mux $procmux$1326.
+    dead port 2/2 on $mux $procmux$1326.
+    dead port 1/2 on $mux $procmux$1324.
+    dead port 2/2 on $mux $procmux$1324.
+    dead port 1/2 on $mux $procmux$1322.
+    dead port 2/2 on $mux $procmux$1322.
+    dead port 1/2 on $mux $procmux$1320.
+    dead port 2/2 on $mux $procmux$1320.
+    dead port 1/2 on $mux $procmux$1318.
+    dead port 2/2 on $mux $procmux$1318.
+    dead port 1/2 on $mux $procmux$1316.
+    dead port 2/2 on $mux $procmux$1316.
+    dead port 1/2 on $mux $procmux$1314.
+    dead port 2/2 on $mux $procmux$1314.
+    dead port 1/2 on $mux $procmux$1312.
+    dead port 2/2 on $mux $procmux$1312.
+    dead port 1/2 on $mux $procmux$1310.
+    dead port 2/2 on $mux $procmux$1310.
+    dead port 1/2 on $mux $procmux$1308.
+    dead port 2/2 on $mux $procmux$1308.
+    dead port 1/2 on $mux $procmux$1306.
+    dead port 2/2 on $mux $procmux$1306.
+    dead port 1/2 on $mux $procmux$1304.
+    dead port 2/2 on $mux $procmux$1304.
+    dead port 1/2 on $mux $procmux$1302.
+    dead port 2/2 on $mux $procmux$1302.
+    dead port 1/2 on $mux $procmux$1300.
+    dead port 2/2 on $mux $procmux$1300.
+    dead port 1/2 on $mux $procmux$1298.
+    dead port 2/2 on $mux $procmux$1298.
+    dead port 1/2 on $mux $procmux$1296.
+    dead port 2/2 on $mux $procmux$1296.
+    dead port 1/2 on $mux $procmux$1294.
+    dead port 2/2 on $mux $procmux$1294.
+    dead port 1/2 on $mux $procmux$1292.
+    dead port 2/2 on $mux $procmux$1292.
+    dead port 1/2 on $mux $procmux$1290.
+    dead port 2/2 on $mux $procmux$1290.
+    dead port 1/2 on $mux $procmux$1288.
+    dead port 2/2 on $mux $procmux$1288.
+    dead port 1/2 on $mux $procmux$1286.
+    dead port 2/2 on $mux $procmux$1286.
+    dead port 1/2 on $mux $procmux$1284.
+    dead port 2/2 on $mux $procmux$1284.
+    dead port 1/2 on $mux $procmux$1282.
+    dead port 2/2 on $mux $procmux$1282.
+    dead port 1/2 on $mux $procmux$1280.
+    dead port 2/2 on $mux $procmux$1280.
+    dead port 1/2 on $mux $procmux$1278.
+    dead port 2/2 on $mux $procmux$1278.
+    dead port 1/2 on $mux $procmux$1276.
+    dead port 2/2 on $mux $procmux$1276.
+    dead port 1/2 on $mux $procmux$1274.
+    dead port 2/2 on $mux $procmux$1274.
+    dead port 1/2 on $mux $procmux$1272.
+    dead port 2/2 on $mux $procmux$1272.
+    dead port 1/2 on $mux $procmux$1270.
+    dead port 2/2 on $mux $procmux$1270.
+    dead port 1/2 on $mux $procmux$1268.
+    dead port 2/2 on $mux $procmux$1268.
+Running muxtree optimizer on module $paramod\auth_cam\TABLE_SIZE=16..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $procmux$1491.
+    dead port 2/2 on $mux $procmux$1491.
+    dead port 1/2 on $mux $procmux$1488.
+    dead port 2/2 on $mux $procmux$1488.
+    dead port 1/2 on $mux $procmux$1485.
+    dead port 2/2 on $mux $procmux$1485.
+    dead port 1/2 on $mux $procmux$1482.
+    dead port 2/2 on $mux $procmux$1482.
+    dead port 1/2 on $mux $procmux$1479.
+    dead port 2/2 on $mux $procmux$1479.
+Running muxtree optimizer on module \hdu_top..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 89 multiplexer ports.
+<suppressed ~114 debug messages>
+
+9.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \fallback_bridge.
+  Optimizing cells in module \slot_allocator.
+  Optimizing cells in module $paramod\auth_cam\TABLE_SIZE=16.
+  Optimizing cells in module \hdu_top.
+Performed a total of 0 changes.
+
+9.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\fallback_bridge'.
+Finding identical cells in module `\slot_allocator'.
+<suppressed ~102 debug messages>
+Finding identical cells in module `$paramod\auth_cam\TABLE_SIZE=16'.
+Finding identical cells in module `\hdu_top'.
+Removed a total of 34 cells.
+
+9.6. Executing OPT_RMDFF pass (remove dff with constant values).
+Removing $procdff$1945 ($adff) from module fallback_bridge.
+Removing $procdff$1936 ($adff) from module fallback_bridge.
+Removing $procdff$1944 ($adff) from module fallback_bridge.
+Removing $procdff$1946 ($dff) from module slot_allocator.
+Removing $procdff$1955 ($dff) from module $paramod\auth_cam\TABLE_SIZE=16.
+Removing $procdff$1991 ($adff) from module $paramod\auth_cam\TABLE_SIZE=16.
+Removing $procdff$1990 ($adff) from module $paramod\auth_cam\TABLE_SIZE=16.
+Removing $procdff$1989 ($adff) from module $paramod\auth_cam\TABLE_SIZE=16.
+Removing $procdff$1992 ($adff) from module $paramod\auth_cam\TABLE_SIZE=16.
+Replaced 9 DFF cells.
+
+9.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \fallback_bridge..
+Finding unused cells or wires in module \slot_allocator..
+Finding unused cells or wires in module $paramod\auth_cam\TABLE_SIZE=16..
+Finding unused cells or wires in module \hdu_top..
+Removed 39 unused cells and 646 unused wires.
+<suppressed ~44 debug messages>
+
+9.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod\auth_cam\TABLE_SIZE=16.
+Optimizing module fallback_bridge.
+Optimizing module hdu_top.
+Optimizing module slot_allocator.
+
+9.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+9.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module $paramod\auth_cam\TABLE_SIZE=16..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \fallback_bridge..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \hdu_top..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \slot_allocator..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~109 debug messages>
+
+9.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module $paramod\auth_cam\TABLE_SIZE=16.
+  Optimizing cells in module \fallback_bridge.
+  Optimizing cells in module \hdu_top.
+  Optimizing cells in module \slot_allocator.
+Performed a total of 0 changes.
+
+9.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod\auth_cam\TABLE_SIZE=16'.
+Finding identical cells in module `\fallback_bridge'.
+Finding identical cells in module `\hdu_top'.
+Finding identical cells in module `\slot_allocator'.
+Removed a total of 0 cells.
+
+9.13. Executing OPT_RMDFF pass (remove dff with constant values).
+
+9.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod\auth_cam\TABLE_SIZE=16..
+Finding unused cells or wires in module \fallback_bridge..
+Finding unused cells or wires in module \hdu_top..
+Finding unused cells or wires in module \slot_allocator..
+
+9.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod\auth_cam\TABLE_SIZE=16.
+Optimizing module fallback_bridge.
+Optimizing module hdu_top.
+Optimizing module slot_allocator.
+
+9.16. Finished OPT passes. (There is nothing left to do.)
+
+10. Executing FSM pass (extract and optimize FSM).
+
+10.1. Executing FSM_DETECT pass (finding FSMs in design).
+Not marking slot_allocator.alloc_slot_id as FSM state register:
+    Register is connected to module port.
+    Users of register don't seem to benefit from recoding.
+
+10.2. Executing FSM_EXTRACT pass (extracting FSM from design).
+
+10.3. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+10.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod\auth_cam\TABLE_SIZE=16..
+Finding unused cells or wires in module \fallback_bridge..
+Finding unused cells or wires in module \hdu_top..
+Finding unused cells or wires in module \slot_allocator..
+
+10.5. Executing FSM_OPT pass (simple optimizations of FSMs).
+
+10.6. Executing FSM_RECODE pass (re-assigning FSM state encoding).
+
+10.7. Executing FSM_INFO pass (dumping all available information on FSM cells).
+
+10.8. Executing FSM_MAP pass (mapping FSMs to basic logic).
+
+11. Executing OPT pass (performing simple optimizations).
+
+11.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod\auth_cam\TABLE_SIZE=16.
+Optimizing module fallback_bridge.
+Optimizing module hdu_top.
+Optimizing module slot_allocator.
+
+11.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod\auth_cam\TABLE_SIZE=16'.
+Finding identical cells in module `\fallback_bridge'.
+Finding identical cells in module `\hdu_top'.
+Finding identical cells in module `\slot_allocator'.
+Removed a total of 0 cells.
+
+11.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module $paramod\auth_cam\TABLE_SIZE=16..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \fallback_bridge..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \hdu_top..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \slot_allocator..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~109 debug messages>
+
+11.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module $paramod\auth_cam\TABLE_SIZE=16.
+  Optimizing cells in module \fallback_bridge.
+  Optimizing cells in module \hdu_top.
+  Optimizing cells in module \slot_allocator.
+Performed a total of 0 changes.
+
+11.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod\auth_cam\TABLE_SIZE=16'.
+Finding identical cells in module `\fallback_bridge'.
+Finding identical cells in module `\hdu_top'.
+Finding identical cells in module `\slot_allocator'.
+Removed a total of 0 cells.
+
+11.6. Executing OPT_RMDFF pass (remove dff with constant values).
+
+11.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod\auth_cam\TABLE_SIZE=16..
+Finding unused cells or wires in module \fallback_bridge..
+Finding unused cells or wires in module \hdu_top..
+Finding unused cells or wires in module \slot_allocator..
+
+11.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod\auth_cam\TABLE_SIZE=16.
+Optimizing module fallback_bridge.
+Optimizing module hdu_top.
+Optimizing module slot_allocator.
+
+11.9. Finished OPT passes. (There is nothing left to do.)
+
+12. Executing MEMORY pass.
+
+12.1. Executing MEMORY_DFF pass (merging $dff cells to $memrd and $memwr).
+
+12.2. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod\auth_cam\TABLE_SIZE=16..
+Finding unused cells or wires in module \fallback_bridge..
+Finding unused cells or wires in module \hdu_top..
+Finding unused cells or wires in module \slot_allocator..
+
+12.3. Executing MEMORY_SHARE pass (consolidating $memrd/$memwr cells).
+
+12.4. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod\auth_cam\TABLE_SIZE=16..
+Finding unused cells or wires in module \fallback_bridge..
+Finding unused cells or wires in module \hdu_top..
+Finding unused cells or wires in module \slot_allocator..
+
+12.5. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+12.6. Executing MEMORY_MAP pass (converting $mem cells to logic and flip-flops).
+
+13. Executing OPT pass (performing simple optimizations).
+
+13.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod\auth_cam\TABLE_SIZE=16.
+Optimizing module fallback_bridge.
+Optimizing module hdu_top.
+Optimizing module slot_allocator.
+
+13.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod\auth_cam\TABLE_SIZE=16'.
+Finding identical cells in module `\fallback_bridge'.
+Finding identical cells in module `\hdu_top'.
+Finding identical cells in module `\slot_allocator'.
+Removed a total of 0 cells.
+
+13.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module $paramod\auth_cam\TABLE_SIZE=16..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \fallback_bridge..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \hdu_top..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \slot_allocator..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~109 debug messages>
+
+13.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module $paramod\auth_cam\TABLE_SIZE=16.
+  Optimizing cells in module \fallback_bridge.
+  Optimizing cells in module \hdu_top.
+  Optimizing cells in module \slot_allocator.
+Performed a total of 0 changes.
+
+13.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod\auth_cam\TABLE_SIZE=16'.
+Finding identical cells in module `\fallback_bridge'.
+Finding identical cells in module `\hdu_top'.
+Finding identical cells in module `\slot_allocator'.
+Removed a total of 0 cells.
+
+13.6. Executing OPT_RMDFF pass (remove dff with constant values).
+
+13.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod\auth_cam\TABLE_SIZE=16..
+Finding unused cells or wires in module \fallback_bridge..
+Finding unused cells or wires in module \hdu_top..
+Finding unused cells or wires in module \slot_allocator..
+
+13.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod\auth_cam\TABLE_SIZE=16.
+Optimizing module fallback_bridge.
+Optimizing module hdu_top.
+Optimizing module slot_allocator.
+
+13.9. Finished OPT passes. (There is nothing left to do.)
+
+14. Printing statistics.
+
+=== $paramod\auth_cam\TABLE_SIZE=16 ===
+
+   Number of wires:                191
+   Number of wire bits:           4125
+   Number of public wires:          45
+   Number of public wire bits:    1483
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                180
+     $adff                           2
+     $dff                           32
+     $eq                            47
+     $logic_and                     16
+     $logic_not                      1
+     $mux                           82
+
+=== fallback_bridge ===
+
+   Number of wires:                 45
+   Number of wire bits:           1202
+   Number of public wires:          15
+   Number of public wire bits:     412
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                 39
+     $add                            3
+     $adff                           3
+     $dff                            5
+     $eq                             6
+     $gt                             1
+     $logic_and                      2
+     $logic_not                      2
+     $lt                             1
+     $mux                           13
+     $pmux                           1
+     $reduce_bool                    1
+     $sub                            1
+
+=== hdu_top ===
+
+   Number of wires:                 28
+   Number of wire bits:            710
+   Number of public wires:          25
+   Number of public wire bits:     707
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                  7
+     $and                            3
+     $not                            1
+     $paramod\auth_cam\TABLE_SIZE=16      1
+     fallback_bridge                 1
+     slot_allocator                  1
+
+=== slot_allocator ===
+
+   Number of wires:                208
+   Number of wire bits:            441
+   Number of public wires:          12
+   Number of public wire bits:      82
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                231
+     $adff                           4
+     $eq                            31
+     $logic_not                      1
+     $mux                          195
+
+=== design hierarchy ===
+
+   hdu_top                           1
+     $paramod\auth_cam\TABLE_SIZE=16      1
+     fallback_bridge                 1
+     slot_allocator                  1
+
+   Number of wires:                472
+   Number of wire bits:           6478
+   Number of public wires:          97
+   Number of public wire bits:    2684
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                454
+     $add                            3
+     $adff                           9
+     $and                            3
+     $dff                           37
+     $eq                            84
+     $gt                             1
+     $logic_and                     18
+     $logic_not                      4
+     $lt                             1
+     $mux                          290
+     $not                            1
+     $pmux                           1
+     $reduce_bool                    1
+     $sub                            1
+
+15. Executing Verilog backend.
+Dumping module `$paramod\auth_cam\TABLE_SIZE=16'.
+Dumping module `\fallback_bridge'.
+Dumping module `\hdu_top'.
+Dumping module `\slot_allocator'.
+
+16. Executing JSON backend.
+
+17. Executing FLATTEN pass (flatten design).
+Using template fallback_bridge for cells of type fallback_bridge.
+Using template $paramod\auth_cam\TABLE_SIZE=16 for cells of type $paramod\auth_cam\TABLE_SIZE=16.
+Using template slot_allocator for cells of type slot_allocator.
+<suppressed ~3 debug messages>
+No more expansions possible.
+
+18. Executing OPT pass (performing simple optimizations).
+
+18.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod\auth_cam\TABLE_SIZE=16.
+Optimizing module fallback_bridge.
+Optimizing module hdu_top.
+Optimizing module slot_allocator.
+
+18.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod\auth_cam\TABLE_SIZE=16'.
+Finding identical cells in module `\fallback_bridge'.
+Finding identical cells in module `\hdu_top'.
+Finding identical cells in module `\slot_allocator'.
+Removed a total of 0 cells.
+
+18.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module $paramod\auth_cam\TABLE_SIZE=16..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \fallback_bridge..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \hdu_top..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \slot_allocator..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~218 debug messages>
+
+18.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module $paramod\auth_cam\TABLE_SIZE=16.
+  Optimizing cells in module \fallback_bridge.
+  Optimizing cells in module \hdu_top.
+  Optimizing cells in module \slot_allocator.
+Performed a total of 0 changes.
+
+18.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod\auth_cam\TABLE_SIZE=16'.
+Finding identical cells in module `\fallback_bridge'.
+Finding identical cells in module `\hdu_top'.
+Finding identical cells in module `\slot_allocator'.
+Removed a total of 0 cells.
+
+18.6. Executing OPT_RMDFF pass (remove dff with constant values).
+
+18.7. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod\auth_cam\TABLE_SIZE=16..
+Finding unused cells or wires in module \fallback_bridge..
+Finding unused cells or wires in module \hdu_top..
+Finding unused cells or wires in module \slot_allocator..
+Removed 29 unused cells and 31 unused wires.
+<suppressed ~37 debug messages>
+
+18.8. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod\auth_cam\TABLE_SIZE=16.
+Optimizing module fallback_bridge.
+Optimizing module hdu_top.
+Optimizing module slot_allocator.
+
+18.9. Rerunning OPT passes. (Maybe there is more to do..)
+
+18.10. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module $paramod\auth_cam\TABLE_SIZE=16..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \fallback_bridge..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \hdu_top..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \slot_allocator..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~211 debug messages>
+
+18.11. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module $paramod\auth_cam\TABLE_SIZE=16.
+  Optimizing cells in module \fallback_bridge.
+  Optimizing cells in module \hdu_top.
+  Optimizing cells in module \slot_allocator.
+Performed a total of 0 changes.
+
+18.12. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod\auth_cam\TABLE_SIZE=16'.
+Finding identical cells in module `\fallback_bridge'.
+Finding identical cells in module `\hdu_top'.
+Finding identical cells in module `\slot_allocator'.
+Removed a total of 0 cells.
+
+18.13. Executing OPT_RMDFF pass (remove dff with constant values).
+
+18.14. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod\auth_cam\TABLE_SIZE=16..
+Finding unused cells or wires in module \fallback_bridge..
+Finding unused cells or wires in module \hdu_top..
+Finding unused cells or wires in module \slot_allocator..
+
+18.15. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod\auth_cam\TABLE_SIZE=16.
+Optimizing module fallback_bridge.
+Optimizing module hdu_top.
+Optimizing module slot_allocator.
+
+18.16. Finished OPT passes. (There is nothing left to do.)
+
+19. Printing statistics.
+
+=== $paramod\auth_cam\TABLE_SIZE=16 ===
+
+   Number of wires:                191
+   Number of wire bits:           4125
+   Number of public wires:          45
+   Number of public wire bits:    1483
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                180
+     $adff                           2
+     $dff                           32
+     $eq                            47
+     $logic_and                     16
+     $logic_not                      1
+     $mux                           82
+
+=== fallback_bridge ===
+
+   Number of wires:                 45
+   Number of wire bits:           1202
+   Number of public wires:          15
+   Number of public wire bits:     412
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                 39
+     $add                            3
+     $adff                           3
+     $dff                            5
+     $eq                             6
+     $gt                             1
+     $logic_and                      2
+     $logic_not                      2
+     $lt                             1
+     $mux                           13
+     $pmux                           1
+     $reduce_bool                    1
+     $sub                            1
+
+=== hdu_top ===
+
+   Number of wires:                441
+   Number of wire bits:           5436
+   Number of public wires:          90
+   Number of public wire bits:    2360
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                425
+     $add                            1
+     $adff                           7
+     $and                            3
+     $dff                           32
+     $eq                            78
+     $gt                             1
+     $logic_and                     18
+     $logic_not                      2
+     $lt                             1
+     $mux                          279
+     $not                            1
+     $reduce_bool                    1
+     $sub                            1
+
+=== slot_allocator ===
+
+   Number of wires:                208
+   Number of wire bits:            441
+   Number of public wires:          12
+   Number of public wire bits:      82
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                231
+     $adff                           4
+     $eq                            31
+     $logic_not                      1
+     $mux                          195
+
+=== design hierarchy ===
+
+   hdu_top                           1
+
+   Number of wires:                441
+   Number of wire bits:           5436
+   Number of public wires:          90
+   Number of public wire bits:    2360
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                425
+     $add                            1
+     $adff                           7
+     $and                            3
+     $dff                           32
+     $eq                            78
+     $gt                             1
+     $logic_and                     18
+     $logic_not                      2
+     $lt                             1
+     $mux                          279
+     $not                            1
+     $reduce_bool                    1
+     $sub                            1
+
+20. Executing Verilog backend.
+Dumping module `$paramod\auth_cam\TABLE_SIZE=16'.
+Dumping module `\fallback_bridge'.
+Dumping module `\hdu_top'.
+Dumping module `\slot_allocator'.
+
+21. Executing JSON backend.
+
+22. Generating Graphviz representation of design.
+Writing dot description to `outputs/hdu_top_flat.dot'.
+Dumping module $paramod\auth_cam\TABLE_SIZE=16 to page 1.
+Dumping module fallback_bridge to page 2.
+Dumping module hdu_top to page 3.
+Dumping module slot_allocator to page 4.
+
+Warnings: 3 unique messages, 5 total
+End of script. Logfile hash: 4e84f8df91
+CPU: user 1.35s system 0.02s, MEM: 24.05 MB total, 17.47 MB resident
+Yosys 0.9 (git sha1 1979e0b)
+Time spent: 24% 9x opt_clean (0 sec), 17% 10x opt_expr (0 sec), ...

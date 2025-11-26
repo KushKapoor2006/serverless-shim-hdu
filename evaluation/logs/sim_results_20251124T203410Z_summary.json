@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "generated_at": "2025-11-24T20:34:10.122673Z",
+    "num_requests": 10000,
+    "seed": 12347,
+    "miss_rate": 0.05,
+    "paired": true,
+    "warmup": 1000,
+    "fallback_full_baseline": false,
+    "created_at": "2025-11-24T20:34:09.951206Z",
+    "notes": "RTL-aligned timings; units = microseconds; clock=200MHz",
+    "clk_freq_mhz": 200,
+    "hdu_cycles": {
+      "parse": 20,
+      "lookup": 30,
+      "alloc": 10,
+      "dispatch": 20
+    },
+    "cam_table_size": 16,
+    "max_slots": 32
+  },
+  "stats": {
+    "Baseline Mean": 50.53161105539132,
+    "Baseline Std": 9.67009891389728,
+    "Baseline Median": 50.53352286895878,
+    "Baseline P99": 72.44940304294614,
+    "FastPath Mean": 6.321450316813266,
+    "FastPath Std": 10.657759275074593,
+    "FastPath Median": 4.034644065878597,
+    "FastPath P99": 61.01007949017129,
+    "Observed Miss Fraction": 0.0474,
+    "Speedup (Mean)": 7.993673686083012,
+    "Speedup (P99)": 1.187498912448028
+  }
+}

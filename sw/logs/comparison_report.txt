@@ -1,0 +1,71 @@
+=== Comparison Report ===
+
+RTL internal dispatch count: 1
+
+RTL summary (sw/logs/rtl_metrics_summary.json):
+{
+  "total_sends": 9,
+  "successes": 1,
+  "failures": 1,
+  "timeouts": 7,
+  "success_rate": 0.1111111111111111,
+  "dispatch_stats": {
+    "count": 1,
+    "mean_us": 0.02,
+    "std_us": 0.0,
+    "median_us": 0.02,
+    "p99_us": 0.02
+  },
+  "fallback_stats": {
+    "count": 1,
+    "mean_us": 0.02,
+    "std_us": 0.0,
+    "median_us": 0.02,
+    "p99_us": 0.02
+  }
+}
+
+SIM summary (latest timestamp: 20251124T203410Z)
+{
+  "baseline_mean_us": 50.53161105539132,
+  "baseline_p99_us": 72.44940304294614,
+  "fast_mean_us": 6.321450316813266,
+  "fast_p99_us": 61.01007949017129,
+  "meta": {
+    "generated_at": "2025-11-24T20:34:10.122673Z",
+    "num_requests": 10000,
+    "seed": 12347,
+    "miss_rate": 0.05,
+    "paired": true,
+    "warmup": 1000,
+    "fallback_full_baseline": false,
+    "created_at": "2025-11-24T20:34:09.951206Z",
+    "notes": "RTL-aligned timings; units = microseconds; clock=200MHz",
+    "clk_freq_mhz": 200,
+    "hdu_cycles": {
+      "parse": 20,
+      "lookup": 30,
+      "alloc": 10,
+      "dispatch": 20
+    },
+    "cam_table_size": 16,
+    "max_slots": 32
+  },
+  "stats": {
+    "Baseline Mean": 50.53161105539132,
+    "Baseline Std": 9.67009891389728,
+    "Baseline Median": 50.53352286895878,
+    "Baseline P99": 72.44940304294614,
+    "FastPath Mean": 6.321450316813266,
+    "FastPath Std": 10.657759275074593,
+    "FastPath Median": 4.034644065878597,
+    "FastPath P99": 61.01007949017129,
+    "Observed Miss Fraction": 0.0474,
+    "Speedup (Mean)": 7.993673686083012,
+    "Speedup (P99)": 1.187498912448028
+  }
+}
+
+SIM fast_mean_us: 6.321450 us
+RTL adjusted mean (nic+pcie + internal): 4.020000 us
+SIM/RTL speedup: 1.573x

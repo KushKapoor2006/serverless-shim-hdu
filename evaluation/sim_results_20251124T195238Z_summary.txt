@@ -1,0 +1,10 @@
+Baseline Mean: 50.598 us
+Baseline Std: 9.546 us
+Baseline Median: 50.681 us
+Baseline P99: 72.687 us
+FastPath Mean: 6.826 us
+FastPath Std: 10.827 us
+FastPath Median: 4.444 us
+FastPath P99: 60.938 us
+Speedup (Mean): 7.412x
+Speedup (P99): 1.193x

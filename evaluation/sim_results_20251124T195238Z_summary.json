@@ -1,0 +1,44 @@
+{
+  "meta": {
+    "generated_at": "2025-11-24T19:52:38.473682Z",
+    "num_requests": 10000,
+    "seed": 12345,
+    "paired": true,
+    "warmup": 1000,
+    "fallback_full_baseline": false,
+    "model_params": {
+      "params_baseline_keys": [
+        "nic_ingress",
+        "pcie_host_rx",
+        "driver_interrupt",
+        "os_network_stack",
+        "middleware_logic",
+        "driver_tx_setup",
+        "pcie_xpu_tx"
+      ],
+      "params_fastpath_keys": [
+        "nic_ingress",
+        "pcie_direct_rx",
+        "hdu_parse",
+        "hdu_lookup",
+        "hdu_alloc",
+        "hdu_dispatch"
+      ],
+      "cache_miss_rate": 0.05
+    },
+    "created_at": "2025-11-24T19:52:38.412088Z",
+    "notes": "Conservative default latencies; units = microseconds"
+  },
+  "stats": {
+    "Baseline Mean": 50.59758199857027,
+    "Baseline Std": 9.546254935615075,
+    "Baseline Median": 50.68060899677808,
+    "Baseline P99": 72.6872158863994,
+    "FastPath Mean": 6.826095537490939,
+    "FastPath Std": 10.826847049355548,
+    "FastPath Median": 4.4438183088006475,
+    "FastPath P99": 60.9381229184155,
+    "Speedup (Mean)": 7.41237530601108,
+    "Speedup (P99)": 1.1928036573051928
+  }
+}
