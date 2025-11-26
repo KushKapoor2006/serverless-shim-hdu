@@ -43,6 +43,7 @@ serverless-shim-hdu/
 ├─ synthesis/                   # synthesis artifacts and Yosys scripts
 │  ├─ outputs/                  # writeouts from Yosys (json, verilog, logs)
 │  └─ hdu_synth.ys              # Yosys script
+├─ Serverless - XPU Shim.pdf    # Orignal Reference paper for Serverless Computing on Heterogeneous Computers
 └─ README.md
 ```
 
