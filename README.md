@@ -54,21 +54,29 @@ Use this for quick navigation in the repo (trimmed to one level):
 
 ```text
 serverless/
-├─ sim/
-├─ hw/
+├─ sim/                    # High level python simulations
+│
+├─ hw/                     # RTL simulation
 │  ├─ rtl/
-│  ├─ tb/
-│  └─ obj_dir/
-├─ sw/
+│  ├─ Makefile             # Verilator build + run targets
+│  ├─ verilator_harness.cpp
+│  └─ obj_dir/             # Verilator-generated C++ + build artifacts
+│
+├─ sw/                     # Hardware-Software Co-Simulation
 │  ├─ driver/
 │  ├─ tests/
-│  └─ logs/
-├─ synthesis/
-│  ├─ rtl/
+│  ├─ logs/                # Graphs, CSV, JSON
+│  └─ Makefile             # sw-side helper targets
+│
+├─ synthesis/              # Yosys
+│  ├─ hdu_synth.ys
+│  ├─ rtl/                 # Yosys-friendly copy of RTL
 │  └─ outputs/
-└─ evaluation/
-   ├─ logs/
-   └─ plots/
+│
+├─ evaluation/             # Results of Simulation
+│  ├─ logs/
+│  └─ plots/
+└─ README.md
 ```
 
 Notes:
@@ -237,13 +245,12 @@ This repo includes Makefile helpers where relevant. Use them as short aliases fo
 
 * `hw/Makefile` — builds/runs Verilator harness (`make run`).
 * `sw/Makefile` — (if present) may contain helpers such as `make plots` or `make compare` — otherwise run Python scripts directly.
-* Top-level `Makefile` (if included) may call the above targets in sequence.
 
 ---
 
 ## Supervision & authorship
 
-* **Kush Kapoor** — Research implementer (GitHub: `KushKapoor2006`).
+* **Kush Kapoor** — Research implementer
 * **Supervisor:** Prof. `<SUPERVISOR_NAME>` — replace with full name and affiliation for CV/publication.
 
 ---
