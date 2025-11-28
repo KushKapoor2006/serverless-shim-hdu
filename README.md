@@ -266,10 +266,8 @@ This repo includes Makefile helpers where relevant. Use them as short aliases fo
 
 ## License & contact
 
-Recommend MIT. If you want, I can add an MIT `LICENSE` file.
+MIT License
 
 **Contact:** [kushkapoor.kk1234@gmail.com](mailto:kushkapoor.kk1234@gmail.com)
 
 ---
-
-*README assembled to be research-grade and reproducible. If you want minor wording or tone changes to match the Flexagon README verbatim, I can perform a final pass to align phrasing exactly.*
