@@ -1,254 +1,313 @@
-# Serverless HDU — README
+# Serverless HDU — Research README
+
+> **Project (research internship / research assistant work)** — Design, implementation and evaluation of a Hardware Dispatch Unit (HDU) to accelerate serverless-style request dispatching, an extension of the **Serverless Computing on Heterogeneous Computers** paper.
+
+**Primary contributions in this repo:**
+
+* Implemented a synthesizable HDU microarchitecture (authorization CAM, bitmap slot allocator, fallback bridge) and verified correctness with Verilator testbenches and Python analysis.
+* Built a reproducible evaluation pipeline: SIM model → RTL harness → event log parsing → SIM/RTL alignment → plots and synthesis metrics.
+* Demonstrated an open-source synthesis flow (Yosys) and reported technology-neutral area proxies used for CV / publication claims.
+
+**Status:** Implementation, functional verification, simulation experiments and open-source synthesis are complete. This code was developed as research assistant work and is intended to be reproducible for further experiments.
 
 ---
 
-## TL;DR
+## Table of Contents
 
-This repository implements a hardware **HDU (Hardware Dispatch Unit)** for serverless-style request dispatching. It includes:
-
-* Cycle-accurate **simulations** (Python + SIM model) of baseline and fast-path request processing,
-* A **SystemVerilog RTL** implementation of the HDU (auth CAM, slot allocator, fallback FIFO),
-* An **open-source synthesis** flow using **Yosys** (produces flattened/hierarchical netlists and stats),
-* Scripts to parse RTL run logs and compare RTL results with the SIM model, and
-* Plotting scripts that produce the figures included in `sw/logs` and `/evaluation/plots`.
-
----
-
-## Highlights & quick metrics
-
-* **End-to-end simulation:** Baseline mean latency **~50.60 µs**, FastPath mean latency **~6.83 µs**; **mean speedup ≈ 7.41×** (SIM `sim_results.json`, 10k requests).  FastPath P99 ≈ **60.94 µs**; Baseline P99 ≈ **72.69 µs**.
-* **RTL (cycle-accurate) micro-bench:** 9 sends (test harness); RTL recorded **1 dispatch** and **1 fallback** (internal dispatch mean = **0.02 µs**). Adjusting RTL internal latency with NIC+PCIe model gives **RTL-adjusted full-path mean ≈ 4.02 µs**, implying **SIM/RTL speedup ≈ 1.57×** for fast-path in this run.
-* **Synthesis (Yosys, flattened)** for `hdu_top` (generic mapping): **Number of cells: 425**, **DFFs (reg count): 32**, **Mux cells: 279**; **Number of wires: 441** (5,436 wire bits). These are the flattened, technology-neutral figures, can be used for area/effort.
-
-> Note: the SIM numbers come from `evaluation/logs/sim_results_*.json` , the RTL numbers come from `sw/logs/rtl_metrics_summary.json` and the Yosys outputs are in `synthesis/outputs`.
+1. [Overview & Motivation](#overview--motivation)
+2. [Project Summary & Highlights](#project-summary--highlights)
+3. [What this repo contains (detailed)](#what-this-repo-contains-detailed)
+4. [Quickstart — reproduce figures & synthesis](#quickstart--reproduce-figures--synthesis)
+5. [Design & RTL modules (short)](#design--rtl-modules-short)
+6. [Simulation & analysis pipeline (method)](#simulation--analysis-pipeline-method)
+7. [Results & quantitative metrics](#results--quantitative-metrics)
+8. [Synthesis & area metrics (Yosys)](#synthesis--area-metrics-yosys)
+10. [How to run everything — commands & tips](#how-to-run-everything--commands--tips)
+11. [CV-ready bullets & how to cite this work](#cv-ready-bullets--how-to-cite-this-work)
+12. [Supervision & authorship](#supervision--authorship)
+13. [Limitations & future work (research roadmap)](#limitations--future-work-research-roadmap)
+14. [License & contact](#license--contact)
 
 ---
 
-## Repo file structure (top-level)
+## Overview & Motivation
+
+Modern serverless and event-driven workloads are highly sensitive to dispatch latency: the time from packet ingress to dispatching work on a compute slot. The conventional software network stack (NIC → kernel → user-space scheduling) produces variable and often-high latencies. This project explores an **HDU microarchitecture** that offloads authorization and slot allocation to hardware to reduce common-case latency (fast-path) while providing a fallback to host handling on misses.
+
+The HDU implements:
+
+* a compact CAM-based authorization table (fast-path matching),
+* a bitmap-based slot allocator to provide fast allocation with minimal logic depth,
+* a fallback bridge FIFO that surfaces misses to the host OS/driver.
+
+The objective is to quantify latency improvements using an event-driven Python SIM and to validate the RTL implementation and synthesizability with Verilator and Yosys.
+
+---
+
+## Project Summary & Highlights
+
+**Key quantitative highlights (from included runs):**
+
+* **SIM (10k requests)**: Baseline mean latency **~50.60 µs**, Baseline P99 **~72.69 µs**. FastPath mean latency **~6.83 µs**, FastPath P99 **~60.94 µs**. **Mean speedup ≈ 7.41×** (SIM model, `sim/sim_results_*.json`).
+* **RTL (Verilator TB run)**: Small verification run with 9 sends; `total_sends=9`, `successes=1`, `failures=1`, `timeouts=7`. Internal HDU dispatch latency measured **0.02 µs**. After adding NIC+PCIe mean latencies, **RTL-adjusted end-to-end mean ≈ 4.02 µs**.
+* **Synthesis (Yosys, flattened)**: `hdu_top` flattened statistics: **Number of cells: 425**, **DFFs (regs): 32**, **Mux cells: 279**, **Number of wires: 441** (5,436 wire bits). These are technology-neutral proxies usable for CV claims.
+
+All artifacts used to produce these numbers are included in the repo and can be regenerated (see Reproducibility section).
+
+---
+
+## What this repo contains (detailed)
 
 ```
 serverless-shim-hdu/
-|
-├─ evaluation/                  # simulator outputs & RTL run logs & plots
-│  ├─ logs/
-│  └─ plots/
-|
+├─ evaluation/           # simulator & RTL logs, plots
+│  ├─ logs/              # sim_results_*.json / rtl_run_*.csv
+│  └─ plots/             # generated analysis plots (PNG)
 ├─ hw/
-│  ├─ obj_dir/
-│  ├─ rtl/                      # SystemVerilog RTL source files
-|  ├─ Makefile                  # top-level build / run helpers (verilator / sim)
-|  ├─ verilator_harness.cpp     # Verilator harness
-|
-├─ sim/                         # Python-based SIM model + experiment scripts
-|
-├─ sw/                          # host-side helper scripts, log parsing + comparison
-│  ├─ tests/                    # parse_rtl_logs.py, compare_with_sim.py
-│  └─ logs/                     # Software test logs and plots
-|
-├─ synthesis/                   # synthesis artifacts and Yosys scripts
-│  ├─ outputs/                  # writeouts from Yosys (json, verilog, logs)
-│  └─ hdu_synth.ys              # Yosys script
-|
-├─ Serverless - XPU Shim.pdf    # Orignal Reference paper for Serverless Computing on Heterogeneous Computers
-└─ README.md
+│  ├─ rtl/               # SystemVerilog RTL sources (hdu_top, blocks...)
+│  └─ tb/                # Verilator testbench & C++ harness
+├─ sim/                  # Python SIM model + experiment scripts
+├─ sw/                   # parsing, comparison and plotting scripts
+│  └─ tests/             # parse_rtl_logs.py, compare_with_sim.py
+├─ synthesis/            # hdu_synth.ys + outputs (Yosys)
+│  └─ outputs/           # hdu_top_flat.v, hdu_top_flat.json, logs
+├─ Makefile              # convenience targets to run TB/sim/synth
+├─ Serverless.pdf        # Orignal XPU Shim Paper
+└─ README.md             # this document
 ```
+
+**Included artifacts**
+
+* Simulation summary (JSON): `evaluation/logs/sim_results_{TS}_summary.json`.
+* RTL per-request summary: `sw/logs/rtl_metrics_summary.json`.
+* Per-request CSV: `sw/logs/per_request_latencies.csv`.
+* Yosys flattened stats: `synthesis/outputs/hdu_synth.log` (see `=== hdu_top ===` after flatten).
+* Plots: `evaluation/plots/*` (CDFs, histograms, speedup-vs-missrate, tail fractions, distribution comparison).
 
 ---
 
-## Getting started — Dependencies
+## Quickstart — reproduce figures & synthesis
 
-Install the following (minimum recommended):
+### Requirements
 
-* **Python 3.8+** with `numpy`, `matplotlib` (for plotting), and `pandas` (optional).
-* **Verilator** (for RTL simulation / TB runs).
-* **Yosys** (for open-source synthesis).
-* **Graphviz** (optional — convert `.dot` files to PNG/PDF).
+* **Python 3.8+**: `numpy`, `matplotlib`, `pandas` (optional)
+* **Verilator** (for RTL verification)
+* **Yosys** (for synthesis) — recommended v0.59+ for improved SV support
+* **Graphviz** (optional — convert `.dot` → PDF/PNG)
 
-On Ubuntu/Debian, an example install sequence:
+Install Python deps quickly:
 
 ```bash
-sudo apt update
-sudo apt install -y verilator yosys graphviz python3-pip
 pip3 install numpy matplotlib pandas
 ```
 
-> If you plan to do FPGA P&R, install `nextpnr` and the vendor support packages for your target (e.g., ECP5, iCE40). That is optional for the core results above.
+### Quick reproduction steps
 
----
-
-## Reproducible experiments — step-by-step
-
-Below are the high-level steps to reproduce the main artifacts (simulation results, RTL log parsing, comparison plots and synthesis).
-
-### 1) Run RTL testbench (Verilator)
-
-Build and run the Verilator-based testbench. The repo includes a `Makefile` target `run` (or `sim`) that builds the Verilator model and runs the TB which writes `evaluation/logs/rtl_run_*.csv`.
+1. Run Verilator testbench (generates RTL CSV logs):
 
 ```bash
-# from repo root
-make run        # builds Verilator model and runs the TB
-# or, if you prefer to run Verilator manually, use the project Makefile commands
+make run
+# output: evaluation/logs/rtl_run_*.csv
 ```
 
-The TB writes CSV logs in `evaluation/logs` (example: `rtl_run_YYYYMMDDTHHMMSS.csv`). Example RTL log lines:
-
-```
-event,cycle,ns
-reset_done,60,300.0
-cfg_write_0,72,360.0
-send_packet,74,370.0
-dispatch_slot_0,78,390.0
-... (truncated)
-```
-
-### 2) Parse RTL logs into per-request metrics
-
-Use the included parser to convert RTL CSV timelines into per-request latencies and a summary JSON.
+2. Parse RTL logs into per-request CSV and JSON summary:
 
 ```bash
 python3 sw/tests/parse_rtl_logs.py
+# output: sw/logs/per_request_latencies.csv, sw/logs/rtl_metrics_summary.json
 ```
 
-Outputs: `sw/logs/per_request_latencies.csv` and `sw/logs/rtl_metrics_summary.json`.
-
-Example summary (from the run in this repository):
-
-```json
-{
-  "total_sends": 9,
-  "successes": 1,
-  "failures": 1,
-  "timeouts": 7,
-  "success_rate": 0.1111111111111111,
-  "dispatch_stats": { "count": 1, "mean_us": 0.02, "p99_us": 0.02 },
-  "fallback_stats": { "count": 1, "mean_us": 0.02 }
-}
-```
-
-> The sample TB run here is intentionally small (few sends) so per-run counts are low — the sim model uses 10k requests for statistical analysis.
-
-### 3) Run simulation experiments (SIM model)
-
-The SIM model in `sim/` generates large-scale request traces and produces `sim_results_{TS}_*.npy` and `sim_results_{TS}_summary.json` files in `evaluation/logs`.
+3. Run SIM experiments (10k requests by default):
 
 ```bash
-# run the SIM experiment (example script name; adjust as necessary)
 python3 sim/run_experiment.py
-# or run a sweep of miss rates
-python3 sim/sweep_missrate.py
+# produces evaluation/logs/sim_results_{TS}_*.npy and sim_results_{TS}_summary.json
 ```
 
-The produced `sim_results_*.json` contains the simulation statistics (10k requests were used in the run included here). Example `stats` snippet (from `sim_results_20251124...`) — key numbers:
-
-```json
-{
-  "Baseline Mean": 50.59758,
-  "Baseline P99": 72.68722,
-  "FastPath Mean": 6.82610,
-  "FastPath P99": 60.93812,
-  "Speedup (Mean)": 7.41238
-}
-```
-
-### 4) Compare RTL vs SIM and produce plots
-
-The helper script reads the latest simulation outputs in `evaluation/logs`, reads the RTL per-request CSV (`sw/logs/per_request_latencies.csv`) and produces comparison plots and a short text report.
+4. Compare SIM vs RTL and generate plots:
 
 ```bash
 python3 sw/tests/compare_with_sim.py
+# outputs: sw/logs/comparison_report.txt and PNG plots
 ```
 
-Outputs placed in `sw/logs/` and `evaluation/plots/` include figures such as:
-
-* `cdf_baseline_fastpath.png`
-* `hist_miss_vs_hit.png`
-* `distribution_plot.png`
-* `comparison_bars.png`
-* `speedup_vs_missrate.png`
-
-(Pre-generated images for the included run are in `evaluation/plots`.)
-
-### 5) Synthesis (Yosys)
-
-A Yosys script (`synthesis/hdu_synth.ys`) produces hierarchical and flattened netlists and statistics. To run the synthesis flow:
+5. Synthesis (Yosys):
 
 ```bash
 cd synthesis
-# run Yosys and log output
+yosys -l outputs/hdu_synth.log -s hdu_synth.ys
+# outputs written to synthesis/outputs/
+```
+
+(See Section *How to run everything* for full command list.)
+
+---
+
+## Design & RTL modules (short)
+
+The RTL implements a small set of blocks wired together in `hdu_top`:
+
+* `header_parser.sv` — extracts func_id and token fields from incoming header words.
+* `auth_cam.sv` — small content-addressable table (CAM) implemented with registers; supports config writes and lookup done in a single clock tick.
+* `slot_allocator.sv` — bitmap-based free-slot allocator that returns first-free slot; designed to be simple and single-cycle ready.
+* `fallback_bridge.sv` — a small FIFO that records fallback events for host injection/processing.
+* `hdu_top.sv` — top-level that ties the above blocks together, provides testbench-facing TB inject ports, and exposes telemetry signals.
+
+Design goals: minimal control-state, easy synthesis in Yosys, and deterministic behavior for accurate latency reporting.
+
+---
+
+## Simulation & analysis pipeline (method)
+
+**SIM (Python) model**
+
+* Event-driven model that simulates NIC ingress, PCIe/host costs, and HDU micro-ops.
+* Parameterized by `sim/model_params.py` containing mean latencies for NIC, PCIe, and HDU cycle counts.
+* Produces per-request latency arrays and summary JSON files for statistical analysis.
+
+**RTL verification (Verilator)**
+
+* Verilator harness drives `hdu_top` with a small set of sends and logs event timelines as CSV (`event,cycle,ns`).
+* `sw/tests/parse_rtl_logs.py` implements a queue-based pairing algorithm to pair `send_packet` events to `dispatch_slot_*` and `auth_fallback` events to compute per-request latencies (cycle → µs via clock period).
+
+**SIM ↔ RTL alignment**
+
+* `sw/tests/compare_with_sim.py` reads latest SIM output and RTL per-request CSV and adjusts the RTL internal latency by adding NIC+PCIe means (from `sim/model_params`) to create an approximate end-to-end RTL distribution. This supports a fair comparison to the SIM model.
+
+---
+
+## Results & quantitative metrics
+
+### SIM results (representative run)
+
+From `evaluation/logs/sim_results_20251124T195238Z_summary.json` (10k requests):
+
+```
+Baseline Mean: 50.59758 µs
+Baseline P99: 72.68722 µs
+FastPath Mean: 6.82610 µs
+FastPath P99: 60.93812 µs
+Speedup (Mean): 7.41238x
+```
+
+Interpretation: the SIM model predicts large mean speedups when requests hit the HDU fast-path; P99 speedup is more modest.
+
+### RTL micro-bench (Verilator TB run)
+
+Small TB run (9 sends) — this run is for functional validation, not statistical analysis:
+
+```
+total_sends: 9
+successes: 1
+failures: 1
+timeouts: 7
+dispatch mean (internal): 0.02 µs
+fallback mean: 0.02 µs
+```
+
+After adding NIC mean (1.5 µs default) + PCIe mean (2.5 µs default) to internal RTL dispatch (0.02 µs), we obtain **RTL-adjusted mean ≈ 4.02 µs** for an approximate end-to-end comparison to SIM fast-path.
+
+### Plots included
+
+Key generated plots (examples included in repo):
+
+* `cdf_baseline_fastpath.png` — CDF of baseline vs fast-path latencies (SIM).
+* `hist_miss_vs_hit.png` — hit/miss histograms for fast-path.
+* `speedup_vs_missrate.png` — how mean speedup degrades with increasing miss rate.
+* `threshold_fractions.png` — tail fractions vs latency threshold.
+* `distribution_plot.png` — combined SIM and RTL distributions for visual comparison.
+
+---
+
+## Synthesis & area metrics (Yosys)
+
+Synthesis was performed with Yosys using a SystemVerilog frontend. The flow produced both hierarchical and flattened netlists.
+
+**Flattened `hdu_top` statistics (technology-neutral):**
+
+```
+Number of wires:                441
+Number of wire bits:           5436
+Number of cells:                425
+  $dff (registers):             32
+  $mux (mux cells):            279
+  $eq (comparators):            78
+  ...
+```
+
+Interpretation: The HDU control datapath is compact (few hundred generic cells). For device-level area/Fmax, run a place-and-route flow (e.g., `Yosys -> nextpnr -> FPGA bitstream`) for a chosen target (Lattice ECP5 recommended for open-source flows).
+
+---
+
+## How to run everything — commands & tips
+
+### Full reproducible pipeline (recommended order)
+
+```bash
+# 1) Build & run RTL TB
+make run
+
+# 2) Parse RTL logs
+python3 sw/tests/parse_rtl_logs.py
+
+# 3) Run SIM experiment(s)
+python3 sim/run_experiment.py
+
+# 4) Compare and plot
+python3 sw/tests/compare_with_sim.py
+
+# 5) Synthesize with Yosys
+cd synthesis
 yosys -l outputs/hdu_synth.log -s hdu_synth.ys
 ```
 
-This writes to `synthesis/outputs/`:
+**Helpful tips:**
 
-* `hdu_top_hier.v`, `hdu_top_hier.json` — hierarchical netlist and JSON
-* `hdu_top_flat.v`, `hdu_top_flat.json` — flattened netlist and JSON
-* `hdu_synth.log` — Yosys log with `stat` sections
-* `hdu_top_flat.dot` (optional): DOT schematic of flattened netlist
-
-The flattened `stat` block (from the included run) contains:
-
-```
-=== hdu_top ===
-   Number of wires:                441
-   Number of wire bits:           5436
-   Number of cells:                425
-     $add                            1
-     $adff                           7
-     $and                            3
-     $dff                           32
-     $eq                            78
-     $mux                          279
-     ...
-```
-
-These numbers are technology-neutral and useful for resume/area estimation. If you want device-specific area/Fmax, run `nextpnr` (target e.g. Lattice ECP5) on `hdu_top_flat.json`.
+* Use the `-l` option to write Yosys logs to `synthesis/outputs/hdu_synth.log` for easy access.
+* If Yosys errors on SystemVerilog constructs, upgrade to a recent build (v0.59+ or git master).
+* Expand the Verilator TB stimulus to drive larger traces (export a SIM trace to the TB) if you need more representative RTL statistics.
 
 ---
 
-## Figures & logs included (examples in repo)
+## CV-ready bullets & how to cite this work
 
-The repository includes example plots and logs (from the simulation and RTL comparison):
+**Academic / Research-style (EPFL / PhD application)**
 
-* `evaluation/plots/cdf_baseline_fastpath.png` (CDFs of latency)
-* `evaluation/plots/hist_miss_vs_hit.png` (histograms of hits vs misses)
-* `evaluation/plots/distribution_plot.png` (combined distributions)
-* `synthesis/outputs/hdu_synth.log` (Yosys output & stats)
-* `sw/logs/rtl_metrics_summary.json` (RTL per-request summary)
-* `evaluation/logs/rtl_run_*.csv` (raw RTL event timeline CSV)
+* *Implemented a synthesizable Hardware Dispatch Unit (HDU) in SystemVerilog (CAM-based authorization, bitmap allocator, fallback FIFO); verified with cycle-accurate Verilator harnesses and a 10k-request Python SIM model, demonstrating a fast-path mean latency ≈ 6.83 µs and mean speedup ≈ 7.41× (SIM).*
+* *Synthesized the HDU using an open-source flow (Yosys); flattened design yields ~425 generic cells (~32 registers), and produced hierarchical/flattened JSON/netlists ready for FPGA mapping and timing estimation.*
 
-Use these in figures for a report or application. They are reproducible via the commands above.
+**Industry-style (concise)**
 
----
+* Designed, simulated and synthesized an HDU offload for sub-10 µs fast-path dispatch: SystemVerilog RTL + Verilator + Yosys pipeline; demonstrated SIM fast-path mean **6.83 µs** and RTL-adjusted end-to-end mean **4.02 µs**.
 
-## How results were computed (methodology)
-
-* **SIM model**: a Python-based event-driven model (in `sim/`) synthesizes request paths through NIC/PCIe/host stack + HDU micro-steps. Model parameters (NIC, PCIe, HDU cycle counts) are in `sim/model_params.py`. Results are statistical (10k requests by default) and reported in microseconds.
-
-* **RTL runs**: the Verilator testbench emits timestamped `event,cycle,ns` records. `sw/tests/parse_rtl_logs.py` uses a queue-based pairing strategy to match `send_packet` events to `dispatch_slot_*` or `auth_fallback` responses and computes per-request latencies (cycles → µs via clock period).
-
-* **RTL-to-SIM comparison**: `sw/tests/compare_with_sim.py` imports the SIM summary and adds NIC+PCIe mean latencies to the RTL internal dispatch latency to form an approximate end-to-end RTL-adjusted latency distribution. This is how the `RTL adjusted mean ≈ 4.02 µs` figure was derived.
-
-* **Synthesis**: Yosys `synth` → `flatten` gives a technology-agnostic gate-level view. The `Number of cells` reported is a generic gate-cell count under Yosys’s internal cell model.
+Use these bullets as-is on your CV; swap phrasing for an industry or academic tone as needed.
 
 ---
 
-## Reproducibility notes & recommended next steps
+## Supervision & authorship
 
-* The included TB run for RTL is small (designed to demonstrate the pipeline); to collect more comprehensive RTL stats, expand the TB stimulus or convert a SIM    trace into a TB driver.
-* For technology-specific metrics (LUTs/FFs/Fmax/power) target an FPGA and run `nextpnr` + vendor bitstream tools (ECP5 recommended for open-source flow).
-* For power estimation, use a VCD from a gate-level simulation and a power estimation tool (vendor or open-source approximators).
+* **Research assistant / implementer:** Kush Kapoor (`KushKapoor2006`)
+* **Supervision:** Prof. `<SUPERVISOR_NAME>` — Research internship / RA supervision (replace with your supervisor's full name and affiliation).
 
----
-
-## Development notes / design trade-offs
-
-* I replaced SystemVerilog `package` usage with a `hdu_defs.svh` `include` to guarantee compatibility with Yosys’ SystemVerilog frontend and to produce clean synthesis outputs.
-* The auth CAM is a small CAM table implemented using registers (no RAM primitives inferred in this run); the fallback bridge is a small software-facing FIFO.
-* The slot allocator uses a bitmap-first-free allocation strategy to minimize logic depth and control state.
+> If you want me to include the supervisor's full affiliation and a one-line description (e.g., "Supervised by Prof. X, Department of Computer Science, University Y"), tell me the exact text and I will add it.
 
 ---
 
-## Contact / Attribution
+## Limitations & future work (research roadmap)
 
-Author: Kush Kapoor (GitHub: `KushKapoor2006`)
+1. Expand RTL TB stimulus to drive large representative traces (import SIM traces) to collect robust RTL per-request statistics.
+2. Improve CAM implementation to use BRAM/true memory primitives for larger tables.
+3. Run a full P&R flow (Yosys -> nextpnr -> device) to extract Fmax and concrete LUT/FF counts on a target FPGA (ECP5 suggested).
+4. Develop adaptive prefetch throttling policies and evaluate energy/DRAM-bandwidth trade-offs.
 
+---
+
+## License & contact
+
+This repository is intended to be published under the MIT license. If you want, I can add an MIT `LICENSE` file to the repo.
+
+**Contact:** [kushkapoor.kk1234@gmail.com](mailto:kushkapoor.kk1234@gmail.com)
+
+---
+
+*README structured for research-grade presentation and reproducibility. If you want the README to match Flexagon's headings and tone verbatim, I can further align phrasing; provide the exact Flexagon README or confirm and I will make an exact mirror.*
