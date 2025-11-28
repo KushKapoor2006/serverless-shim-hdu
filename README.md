@@ -22,7 +22,7 @@ These artifacts are reproducible using the scripts and Makefiles in the reposito
 2. [Project Summary & Contributions](#project-summary--contributions)
 3. [Repository layout (high-level)](#repository-layout-high-level)
 4. [Quickstart & execution pipeline (reproducible)](#quickstart--execution-pipeline-reproducible)
-5. [Design & RTL modules (short)](#design--rtl-modules-short)
+5. [Design & RTL modules](#design--rtl-modules)
 6. [Simulation & analysis pipeline (method)](#simulation--analysis-pipeline-method)
 7. [Results & figures included](#results--figures-included)
 8. [Synthesis & how to reproduce area metrics](#synthesis--how-to-reproduce-area-metrics)
@@ -159,15 +159,64 @@ The Yosys flow writes hierarchical and flattened netlists + `stat` blocks; inspe
 
 ---
 
-## Design & RTL modules (short)
+## Design & RTL modules
 
-* `header_parser.sv`: extracts function ID and token from incoming headers.
-* `auth_cam.sv`: small CAM implemented as registers with config writes and a combinational (1-cycle) lookup.
-* `slot_allocator.sv`: bitmap-based first-free allocator.
-* `fallback_bridge.sv`: FIFO that records fallback events for the host.
-* `hdu_top.sv`: top-level instantiating components and exposing TB/host-facing ports.
+(Short summary plus key signals and behaviors. See RTL files for full details.)
 
-Design goals: simple control, deterministic behavior, synthesizable in Yosys.
+### `hdu_defs.svh` / `hdu_pkg.sv` (Yosys vs legacy)
+
+* Project-wide constants and widths. `hdu_defs.svh` is a Yosys-friendly include that defines macros such as `HDU_DATA_WIDTH`, `HDU_FUNC_ID_WIDTH`, `HDU_TOKEN_WIDTH`, `HDU_SLOT_ID_WIDTH` and header bit positions. The legacy `hdu_pkg.sv` (if present) contains the equivalent typedefs/parameters used during simulation; for synthesis prefer the `.svh` include.
+
+### `header_parser.sv`
+
+* Extracts fields from the input header word: `func_id` and `token`. Handles simple input-valid latching and presents `out_valid`, `out_func_id`, and `out_token` to downstream blocks.
+* Key signals: `in_valid`, `in_data[DATA_W-1:0]`, `out_valid`, `out_func_id`, `out_token`.
+
+### `auth_cam.sv`
+
+* Small content-addressable table implemented via registers. Supports configuration writes (`cfg_wr_en`, `cfg_addr`, `cfg_func_id`, `cfg_token`) and single-cycle lookups (`lookup_func_id`, `lookup_token` → `auth_pass`, `auth_done`).
+* CAM modeled as parallel arrays (`table_func[]`, `table_tok[]`); lookups scan the table and assert `auth_pass` when a match is found.
+* Key signals: `cfg_*` config interface, `lookup_*` lookup interface, `auth_pass`, `auth_done`.
+
+### `slot_allocator.sv`
+
+* Bitmap-based first-free allocator. Maintains a `busy` bitmask for `MAX_SLOTS` and returns the first free slot on request (`req_valid`). Also accepts frees (`free_en`, `free_slot_id`). Designed for minimal control logic and single-cycle readiness (where possible).
+* Tracks allocation success/failure via `alloc_success`, `alloc_fail`, and `alloc_valid` signals.
+* Key signals: `req_valid`, `req_ready`, `free_slot_id`, `free_en`, `alloc_slot_id`, `alloc_success`, `alloc_fail`, `alloc_valid`.
+
+### `fallback_bridge.sv`
+
+* Small FIFO that packs fallback information (function ID + truncated token) into a 64-bit entry for host consumption. Accepts `fail_valid`/`fail_*` and exposes `irq_valid`/`irq_data` to the host side.
+* Internal circular buffer with `wr_ptr`, `rd_ptr`, `count`; reports overflows via a telemetry counter.
+* Key signals: `fail_valid`, `fail_func_id`, `fail_token`, `host_ready`, `irq_valid`, `irq_data`.
+
+### `hdu_top.sv`
+
+* Top-level HDU that stitches together the header parser, auth CAM, slot allocator, and fallback bridge. Provides a test-harness injection port (`tb_inject_*`) for simulation, an AXI-Stream-like `s_axis_tdata/tvalid/tready` input, and dispatch outputs to compute (`dispatch_slot`, `dispatch_valid`).
+* Exposes telemetry counters and host IRQ interface.
+* Key behaviors: choose between TB-inject and AXIS input, issue lookup to CAM, on `auth_pass` request allocator and assert dispatch outputs; on miss, assert fallback.
+
+### `verilator_harness.cpp` (hw/verilator harness)
+
+* Drives clock/reset, packs test vectors into the DUT inputs, and logs timestamped events to produce `evaluation/logs/rtl_run_*.csv` with lines `event,cycle,ns`.
+* Emits per-request logs (`verilator_run_log.txt`) and optional VCD waveform dumps for detailed debugging.
+* Used in `hw/Makefile` to build and run the TB.
+
+### `sw/tests/parse_rtl_logs.py`
+
+* Queue-based RTL CSV parser: matches `send_packet` events to the earliest unmatched `dispatch_slot_*` or `auth_fallback` event to compute per-request latencies.
+* Produces `sw/logs/per_request_latencies.csv` and `sw/logs/rtl_metrics_summary.json`.
+
+### `sw/tests/compare_with_sim.py` and plotting utilities
+
+* Loads latest SIM outputs from `evaluation/logs`, loads RTL per-request CSV, adjusts RTL internal latencies with NIC+PCIe means (from `sim/model_params.py`), and produces comparison plots (`sw/logs/distribution_plot.png`, `comparison_bars.png`) and a `sw/logs/comparison_report.txt`.
+* Key outputs: distribution CDFs, histograms, summary report comparing SIM vs RTL-adjusted metrics.
+
+### `sim/run_experiment.py`, `simulation_engine.py`, `model_params.py`
+
+* Event-driven Python simulator and experiment runner. `model_params.py` exposes NIC/PCIe and HDU cycle latencies used to construct end-to-end timing. `run_experiment.py` runs the configured workload (default: 10k requests) and writes `evaluation/logs/sim_results_{TS}_*.npy` plus a summary JSON with the stats used in the README.
+* `sweep_missrate.py` runs experiments across miss-rate values to generate `speedup_vs_missrate.png`.
+
 
 ---
 
