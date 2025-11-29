@@ -300,7 +300,7 @@ This repo includes Makefile helpers where relevant. Use them as short aliases fo
 ## Supervision & authorship
 
 * **Kush Kapoor** — Research implementer
-* **Supervisor:** Prof. Dr. Jasraj Meena (DTU)
+* **Supervisor:** Prof. Dr. Jasraj Meena (Delhi Technological University)
 
 ---
 
