@@ -300,7 +300,7 @@ This repo includes Makefile helpers where relevant. Use them as short aliases fo
 ## Supervision & authorship
 
 * **Kush Kapoor** — Research implementer
-* **Supervisor:** Prof. `<SUPERVISOR_NAME>` — replace with full name and affiliation for CV/publication.
+* **Supervisor:** Prof. Dr. Jasraj Meena
 
 ---
 
