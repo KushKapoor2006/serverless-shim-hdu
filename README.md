@@ -23,6 +23,8 @@ Synthesized using **Vivado 2023.1** targeting **Xilinx Zynq-7020**.
 | **Total Registers** | **1,519 FFs** | 85% utilization by `auth_cam` for single-cycle parallel search |
 | **Throughput Speedup** | **7.41x** | End-to-end payload processing (6.83µs RTL vs 50.60µs SW) |
 
+Designed a **single-cycle register-based CAM (1.3k FFs) for O(1)** authorization lookups, eliminating OS context-switching penalties and reducing **dispatch latency to 2 clock cycles (<13ns)**.
+
 ---
 
 ## Table of contents
