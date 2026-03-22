@@ -38,7 +38,6 @@ Designed a **single-cycle register-based CAM (1.3k FFs) for O(1)** authorization
 7. [Results & figures included](#results--figures-included)
 8. [Synthesis & how to reproduce area metrics](#synthesis--how-to-reproduce-area-metrics)
 9. [Files with Makefiles and commands](#files-with-makefiles-and-commands)
-11. [Supervision & authorship](#supervision--authorship)
 12. [Limitations & future work](#limitations--future-work)
 13. [License & contact](#license--contact)
 
@@ -308,12 +307,7 @@ This repo includes Makefile helpers where relevant. Use them as short aliases fo
 
 ---
 
-## Supervision & authorship
 
-* **Kush Kapoor** — Research implementer
-* **Supervisor:** Prof. Dr. Jasraj Meena (Delhi Technological University)
-
----
 
 ## Limitations & future work
 
